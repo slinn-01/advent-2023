@@ -8,10 +8,8 @@ function getRoundMinimum(rounds) {
         'red': 0,
         'green': 0,
     };
-    // console.log('rds', rounds);
     for (let roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
         const cubes = rounds[roundIndex].split(',');
-        // console.log('cub', cubes);
         for (let cubeIndex = 0; cubeIndex < cubes.length; cubeIndex++) {
             const cubeInfo = cubes[cubeIndex];
             const cubeCount = parseInt(cubeInfo.replace(/\D/g, ''));
@@ -31,52 +29,14 @@ function getRoundMinimum(rounds) {
     return minimums;
 }
 
-function isRoundValid(round) {
-    if (!round) {
-        return false;
-    }
-    for (let i = 0; i < round.length; i++) {
-        const cubeCount = parseInt(round[i].replace(/\D/g, ''));
-        if (cubeCount > 14) {
-            return false;
-        }
-        if (cubeCount <= 12) {
-            continue;
-        }
-        if (cubeCount === 13 & round[i].includes('red')) {
-            return false
-        }
-        if (cubeCount === 14 & !round[i].includes('blue')) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function validGame(game) {
-    if (!game) {
-        return 0;
-    }
-    const gameNameAndRound = game.split(':');
-    const rounds = gameNameAndRound[1].split(';');
-    for (let i = 0; i < rounds.length; i++) {
-        if (!isRoundValid(rounds[i].split(','))) {
-            return 0;
-        }
-    }
-    // All rounds valid
-    return parseInt(gameNameAndRound[0].replace(/\D/g, ''));
-}
-
 fs.readFile(inputFile, 'utf8', (err, data) => {
     if (err) {
         console.error(err);
         return;
     }
     const lines = data.split('\n');
-    const testLines = lines.slice(0,5);
     let sum = 0;
-    lines.forEach((line, index) => {
+    lines.forEach((line,) => {
         if (!line) {
             return;
         }
@@ -85,7 +45,6 @@ fs.readFile(inputFile, 'utf8', (err, data) => {
         for (cube in minimums) {
             product *= minimums[cube];
         }
-        // console.log(product);
         sum += product;
     });
     console.log(sum);
