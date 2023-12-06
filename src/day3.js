@@ -2,12 +2,12 @@
 const inputFile = '../input/day3.txt';
 const fs = require('node:fs');
 
-function isDigit(c) {
-    return (c >= '0' && c <= '9');
+function isGear(c) {
+    return c === '*';
 }
 
-function isSymbol(c) {
-    return !isDigit(c) && c != '.';
+function isDigit(c) {
+    return (c >= '0' && c <= '9');
 }
 
 function getValueFromIndex(line, i, j) {
@@ -24,57 +24,133 @@ fs.readFile(inputFile, 'utf8', (err, data) => {
     let sum = 0;
     for (let lineIndex = 0; lineIndex < tempLines.length; lineIndex++) {
         for (let i = 0; i < tempLines[lineIndex].length; i++) {
-            if (isDigit(tempLines[lineIndex][i])) {
-                let j = i;
-                while (isDigit(tempLines[lineIndex][j])) {
-                    j++;
+        
+            if (!isGear(tempLines[lineIndex][i])) {
+                continue;
+            }
+            const numbers = [];
+            // check for leading number
+            if (isDigit(tempLines[lineIndex][i-1])) {
+                let digitEnd = i - 1;
+                let digitStart = digitEnd;
+                while(isDigit(tempLines[lineIndex][digitStart])) {
+                    digitStart--;
                 }
-                j--;
-                // Check previous position in line
-                if (tempLines[lineIndex][i-1] && isSymbol(tempLines[lineIndex][i-1])) {
-                    sum += getValueFromIndex(tempLines[lineIndex], i, j);
-                    i = j + 1;
-                    continue;
+                digitStart++;
+                numbers.push(getValueFromIndex(tempLines[lineIndex], digitStart, digitEnd));
+            }
+            // check for trailing number
+            if (isDigit(tempLines[lineIndex][i+1])) {
+                let digitStart = i + 1;
+                let digitEnd = digitStart;
+                while(isDigit(tempLines[lineIndex][digitEnd])) {
+                    digitEnd++;
                 }
-                // Check above
-                if (tempLines[lineIndex - 1]) {
-                    // Loop from i-1-j+1 in this line, checking for symbol. If so, add me
-                    let symbolFound = false;
-                    for (let k = i - 1; k <= j+1; k++) {
-                        if (tempLines[lineIndex - 1][k] && isSymbol(tempLines[lineIndex - 1][k])) {
-                            symbolFound = true;
-                            break;
-                        }
+                digitEnd--;
+                numbers.push(getValueFromIndex(tempLines[lineIndex], digitStart, digitEnd));
+            }
+            // check for numbers above
+            if (tempLines[lineIndex - 1]) {
+                // Check for number in middle (if num in middle, only one on top)
+                if (isDigit(tempLines[lineIndex - 1][i])) {
+                    let digitStart = i;
+                    while(isDigit(tempLines[lineIndex - 1][digitStart])) {
+                        digitStart--;
                     }
-                    if (symbolFound) {
-                        sum += getValueFromIndex(tempLines[lineIndex], i, j);
-                        i = j + 1;
+                    digitStart++;
+                    let digitEnd = i;
+                    while(isDigit(tempLines[lineIndex - 1][digitEnd])) {
+                        digitEnd++
+                    }
+                    digitEnd--;
+                    numbers.push(getValueFromIndex(tempLines[lineIndex - 1], digitStart, digitEnd));
+                    if (numbers.length > 2) {
                         continue;
                     }
-                }
-                // Check after
-                if (tempLines[lineIndex][j+1] && isSymbol(tempLines[lineIndex][j+1])) {
-                    sum += getValueFromIndex(tempLines[lineIndex], i, j);
-                    i = j + 1;
-                    continue;
-                }
-                //
-                if (tempLines[lineIndex + 1]) {
-                    // Loop from i-1-j+1 in this line, checking for symbol. If so, add me
-                    let symbolFound = false;
-                    for (let k = i - 1; k <= j+1; k++) {
-                        if (tempLines[lineIndex + 1][k] && isSymbol(tempLines[lineIndex + 1][k])) {
-                            symbolFound = true;
-                            break;
+                } else {
+                    // Check for left diag
+                    if (isDigit(tempLines[lineIndex - 1][i-1])) {
+                        let digitEnd = i - 1;
+                        let digitStart = digitEnd;
+                        while (isDigit(tempLines[lineIndex - 1][digitStart])) {
+                            digitStart--;
+                        }
+                        digitStart++;
+                        numbers.push(getValueFromIndex(tempLines[lineIndex - 1], digitStart, digitEnd));
+                        if (numbers.length > 2) {
+                            continue;
                         }
                     }
-                    if (symbolFound) {
-                        sum += getValueFromIndex(tempLines[lineIndex], i, j);
-                        i = j + 1;
-                        continue;
+
+                    // Check for right diag
+                    if (isDigit(tempLines[lineIndex - 1][i+1])) {
+                        let digitStart = i + 1;
+                        let digitEnd = digitStart;
+                        while (isDigit(tempLines[lineIndex - 1][digitEnd])) {
+                            digitEnd++;
+                        }
+                        digitEnd--;
+                        numbers.push(getValueFromIndex(tempLines[lineIndex - 1], digitStart, digitEnd));
+                        if (numbers.length > 2) {
+                            continue;
+                        }
                     }
                 }
             }
+
+            // check for numbers below
+            if (tempLines[lineIndex + 1]) {
+                // Check for number in middle (if num in middle, only one on top)
+                if (isDigit(tempLines[lineIndex + 1][i])) {
+                    let digitStart = i;
+                    while(isDigit(tempLines[lineIndex + 1][digitStart])) {
+                        digitStart--;
+                    }
+                    digitStart++;
+                    let digitEnd = i;
+                    while(isDigit(tempLines[lineIndex + 1][digitEnd])) {
+                        digitEnd++
+                    }
+                    digitEnd--;
+                    numbers.push(getValueFromIndex(tempLines[lineIndex + 1], digitStart, digitEnd));
+                    if (numbers.length > 2) {
+                        continue;
+                    }
+                } else {
+                    // Check for left diag
+                    if (isDigit(tempLines[lineIndex + 1][i-1])) {
+                        let digitEnd = i - 1;
+                        let digitStart = digitEnd;
+                        while (isDigit(tempLines[lineIndex + 1][digitStart])) {
+                            digitStart--;
+                        }
+                        digitStart++;
+                        numbers.push(getValueFromIndex(tempLines[lineIndex + 1], digitStart, digitEnd));
+                        if (numbers.length > 2) {
+                            continue;
+                        }
+                    }
+
+                    // Check for right diag
+                    if (isDigit(tempLines[lineIndex + 1][i+1])) {
+                        let digitStart = i + 1;
+                        let digitEnd = digitStart;
+                        while (isDigit(tempLines[lineIndex + 1][digitEnd])) {
+                            digitEnd++;
+                        }
+                        digitEnd--;
+                        numbers.push(getValueFromIndex(tempLines[lineIndex + 1], digitStart, digitEnd));
+                        if (numbers.length > 2) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            if (numbers.length != 2) {
+                continue;
+            }
+            console.log(numbers);
+            sum += (numbers[0] * numbers[1]);
         }
     }
     console.log(sum);
