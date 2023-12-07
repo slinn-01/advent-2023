@@ -16,7 +16,7 @@ function getScore(winners, results) {
             score++
         }
     });
-    return !!score ? 2**(score-1) : 0;
+    return score;
 }
 
 
@@ -29,11 +29,28 @@ fs.readFile(inputFile, 'utf8', (err, data) => {
     lines.pop();
     const tempLines = lines;
     let sum = 0;
-    tempLines.forEach((line) => {
+    const counts = [1];
+    tempLines.forEach((line, linenumber) => {
         const cardSplit = line.split('|');
         const winners = cardSplit[0].split(' ').slice(2).filter(item => item != '');
         const results = cardSplit[1].split(' ').filter(item => item != '');
-        sum += getScore(winners, results);
-    })
+        const score = getScore(winners, results);
+        if (!counts[linenumber]) {
+            counts[linenumber] = 1;
+        }
+        const currentCount = counts[linenumber];
+        for (let i = 0; i < currentCount; i++) {
+            for (let j = 0; j < score; j++) {
+                if (counts[linenumber + j + 1]) {
+                    counts[linenumber + j + 1]++;
+                } else {
+                    counts[linenumber + j + 1] = 2;
+                }
+            }
+        }
+    });
+    counts.forEach((count) => {
+        sum += count;
+    });
     console.log(sum);
 });
